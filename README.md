@@ -150,9 +150,9 @@ get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/mai
 - [x] `jbs-deps.toml` auto-discovery in CWD
 
 ### In flight
-- [ ] **Rename `jbs-deps.toml` → `jb-deps.toml`** across just-bashit source, docs, doppler
+- [x] **Rename `jbs-deps.toml` → `jb-deps.toml`** across just-bashit source, docs, doppler
+- [x] **`jb install`** — reads `jb.toml`, walks up from CWD, pre-fetches every declared tool into cache
 - [ ] **`just-makeit new` emits `jb-deps.toml` + `jb.toml`** pre-populated
-- [ ] **`jb install`** — read `jb.toml`, pre-fetch every declared tool into cache
 - [ ] **User namespace config** — `~/.config/just-runit/namespaces.toml` for custom NS registration
 
 ### Gaps
