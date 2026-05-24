@@ -152,7 +152,7 @@ get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/mai
 ### In flight
 - [x] **Rename `jbs-deps.toml` → `jb-deps.toml`** across just-bashit source, docs, doppler
 - [x] **`jb install`** — reads `jb.toml`, walks up from CWD, pre-fetches every declared tool into cache
-- [ ] **`just-makeit new` emits `jb-deps.toml` + `jb.toml`** pre-populated
+- [x] **`just-makeit new` emits `jb.toml`** with dev deps pre-populated; `jbx install-deps -g dev` works immediately
 - [ ] **User namespace config** — `~/.config/just-runit/namespaces.toml` for custom NS registration
 
 ### Gaps
