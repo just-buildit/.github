@@ -124,7 +124,7 @@ config = "just-makeit.toml"
 ```toml
 [aliases]
 install-deps   = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/install-deps.sh"
-get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/get-just-runit.sh"
+get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/get-jb.sh"
 # Third-party tools welcomed via PR.
 ```
 
