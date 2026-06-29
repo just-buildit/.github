@@ -15,7 +15,7 @@ tooling pulls the rest on demand.
 
 | Name | Role | Get it |
 |---|---|---|
-| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just-runit) (`jb`) | Fast ephemeral script runner | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` |
+| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jb`) | Fast ephemeral script runner | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` |
 | [**just-bashit**](https://github.com/just-buildit/just-bashit) | Proven bash scripts & tools | `jbx just-bashit:logging log "hello"` |
 | [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`) | Python C extensions out-of-the-box | `jbx get-just-makeit` |
 | [**just-buildit**](https://github.com/just-buildit/just-buildit) | Zero-dep PEP 517 build backend for C extensions | `jbx get-just-buildit` |
@@ -123,8 +123,8 @@ config = "just-makeit.toml"
 ### `aliases.toml` (hosted at org-pages root)
 ```toml
 [aliases]
-install-deps   = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/install-deps.sh"
-get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/get-jb.sh"
+install-deps   = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/just_bashit/install-deps.sh"
+get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/just_bashit/get-jb.sh"
 # Third-party tools welcomed via PR.
 ```
 
