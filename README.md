@@ -4,7 +4,7 @@
 
 <p align="center"><em>Complete project infrastructure tooling and automation.</em></p>
 
----
+______________________________________________________________________
 
 Stand up a complete project, install its system dependencies, fetch
 and run its tools, build it into a wheel — all from small primitives
@@ -13,12 +13,12 @@ tooling pulls the rest on demand.
 
 ## Tools
 
-| Name | Role | Get it |
-|---|---|---|
-| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jb`) | Fast ephemeral script runner | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` |
-| [**just-bashit**](https://github.com/just-buildit/just-bashit) | Proven bash scripts & tools | `jbx just-bashit:logging log "hello"` |
-| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`) | Python C extensions out-of-the-box | `jbx get-just-makeit` |
-| [**just-buildit**](https://github.com/just-buildit/just-buildit) | Zero-dep PEP 517 build backend for C extensions | `jbx get-just-buildit` |
+| Name                                                                                                      | Role                                            | Get it                                                    |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jb`) | Fast ephemeral script runner                    | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` |
+| [**just-bashit**](https://github.com/just-buildit/just-bashit)                                            | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"`                     |
+| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                     | Python C extensions out-of-the-box              | `jbx get-just-makeit`                                     |
+| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                          | Zero-dep PEP 517 build backend for C extensions | `jbx get-just-buildit`                                    |
 
 Each tool stands alone. They also compose.
 
@@ -42,8 +42,7 @@ function dispatch, sandboxed env — all there.
 
 **Namespaces** — `jbx [NAMESPACE:]NAME`. A namespace resolves to a base
 URL. The default is `just-buildit`, served from the org-pages root with
-a curated `aliases.toml`. `jbx install-deps` just works; `jbx
-gh:user/repo/tool` hits GitHub raw directly.
+a curated `aliases.toml`. `jbx install-deps` just works; `jbx gh:user/repo/tool` hits GitHub raw directly.
 
 ## Get started
 
@@ -67,8 +66,9 @@ make && make test
 
 MIT across all repos.
 
----
----
+______________________________________________________________________
+
+______________________________________________________________________
 
 # Internal — roadmap & gaps
 
@@ -77,26 +77,26 @@ MIT across all repos.
 ## Design conventions
 
 - **`jb-deps.toml`** — declarative system-package list grouped by purpose
-  (`runtime`, `dev`) and package manager (`apt`, `pacman`, `brew`,
-  `dnf`, `zypper`, `msys2`). Lives at repo root; auto-discovered by
-  `jbx install-deps`.
+    (`runtime`, `dev`) and package manager (`apt`, `pacman`, `brew`,
+    `dnf`, `zypper`, `msys2`). Lives at repo root; auto-discovered by
+    `jbx install-deps`.
 - **`jb.toml`** — explicit list of `jb`/`jbx` tools a project depends on,
-  analogous to `[project.dependencies]`. Lives at repo root in every
-  project type (Python, C, bare). `pyproject.toml` keeps its packaging
-  job, `jb.toml` keeps its tool job.
+    analogous to `[project.dependencies]`. Lives at repo root in every
+    project type (Python, C, bare). `pyproject.toml` keeps its packaging
+    job, `jb.toml` keeps its tool job.
 - **Namespaced invocation** — `jbx [NS:]NAME`. A namespace resolves to a
-  single base URL. Default namespace = `just-buildit`. Built-in prefixes:
-  `just-bashit:`, `gh:`, `https://`.
+    single base URL. Default namespace = `just-buildit`. Built-in prefixes:
+    `just-bashit:`, `gh:`, `https://`.
 - **`aliases.toml`** — manifest at the org-pages root mapping short
-  names to URLs. `jbx some-tool` consults the alias table when there is
-  no script at `${NS_URL}/some-tool[.sh|.py]`.
-- **`install-deps.sh`** — thin per-project shim that delegates to `jbx
-  install-deps`. Optional — `jbx install-deps` works directly when
-  `jb-deps.toml` is present.
+    names to URLs. `jbx some-tool` consults the alias table when there is
+    no script at `${NS_URL}/some-tool[.sh|.py]`.
+- **`install-deps.sh`** — thin per-project shim that delegates to `jbx install-deps`. Optional — `jbx install-deps` works directly when
+    `jb-deps.toml` is present.
 
 ## Schemas
 
 ### `jb-deps.toml`
+
 ```toml
 [runtime.apt]    packages = ["libzmq3-dev", "libfftw3-dev"]
 [runtime.pacman] packages = ["zeromq", "fftw"]
@@ -105,6 +105,7 @@ MIT across all repos.
 ```
 
 ### `jb.toml`
+
 ```toml
 [project]
 name    = "my_project"
@@ -121,6 +122,7 @@ config = "just-makeit.toml"
 ```
 
 ### `aliases.toml` (hosted at org-pages root)
+
 ```toml
 [aliases]
 install-deps   = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/just_bashit/install-deps.sh"
@@ -131,15 +133,16 @@ get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/mai
 ### Resolution precedence for `jbx NAME`
 
 1. **Explicit `NS:` prefix** — `jbx gh:user/repo/x`, `jbx https://...`:
-   skip everything below, resolve directly.
-2. **`[tools.NAME]` in `jb.toml`** (walking up from CWD) — use declared source.
-3. **Default namespace `aliases.toml`** — fetch (cached), look up `NAME`.
-4. **Default namespace direct hit** — HEAD `${NS_URL}/NAME.sh`, then `.py`.
-5. **Error** — name not found.
+    skip everything below, resolve directly.
+1. **`[tools.NAME]` in `jb.toml`** (walking up from CWD) — use declared source.
+1. **Default namespace `aliases.toml`** — fetch (cached), look up `NAME`.
+1. **Default namespace direct hit** — HEAD `${NS_URL}/NAME.sh`, then `.py`.
+1. **Error** — name not found.
 
 ## Status
 
 ### Shipped
+
 - [x] `jb` / `jbx` / `just-buildit` naming; conflict detection for `jb`; stale `jr`/`jx` cleanup on reinstall
 - [x] `jb` top-level subcommand dispatch (`jb run` → runner; extensible for `jb install` etc.)
 - [x] Namespace model: bare NAME → default NS via `aliases.toml` then HEAD probe; `just-bashit:NAME` co-fetch
@@ -150,12 +153,14 @@ get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/mai
 - [x] `jbs-deps.toml` auto-discovery in CWD
 
 ### In flight
+
 - [x] **Rename `jbs-deps.toml` → `jb-deps.toml`** across just-bashit source, docs, doppler
 - [x] **`jb install`** — reads `jb.toml`, walks up from CWD, pre-fetches every declared tool into cache
 - [x] **`just-makeit new` emits `jb.toml`** with dev deps pre-populated; `jbx install-deps -g dev` works immediately
 - [ ] **User namespace config** — `~/.config/just-runit/namespaces.toml` for custom NS registration
 
 ### Gaps
+
 - [ ] **Parity `get-just-*.sh` scripts** — add `get-just-makeit.sh`, `get-just-bashit.sh`, `get-just-buildit.sh`
 - [ ] **`just-buildit init [--pep517|--bare|--c]`** — unified scaffold entry point
 - [ ] `jb-deps.toml` / `jb.toml` schemas — JSON Schema for editor completion
@@ -164,19 +169,19 @@ get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/mai
 ## Decision log
 
 - **`jb-deps.toml` beats stdin** when both are present. TTY detection
-  (`[ -t 0 ]`) doesn't survive `bash -c` or CI — file-first is the only
-  reliable ordering.
+    (`[ -t 0 ]`) doesn't survive `bash -c` or CI — file-first is the only
+    reliable ordering.
 - **Filename prefix is `jb-`**, not `jbs-` — the deps file is an org-level
-  convention, not a just-bashit-specific one.
+    convention, not a just-bashit-specific one.
 - **`jb` may conflict** (e.g. Jenkins X used `jx`; `jb` could be taken too).
-  Installer detects this and falls back to `just-buildit`, which is always
-  installed and unique.
+    Installer detects this and falls back to `just-buildit`, which is always
+    installed and unique.
 - **`jbx` is the runner shorthand** — `jb run` for the subcommand form,
-  `jbx` for fast one-liners. Both always installed.
+    `jbx` for fast one-liners. Both always installed.
 - **`jb.toml` is standalone**, not a `[tool.jb]` table in `pyproject.toml`.
-  Uniform across project types; Python packaging metadata stays uncoupled
-  from cross-org tooling.
+    Uniform across project types; Python packaging metadata stays uncoupled
+    from cross-org tooling.
 - **`--pep517` delegates** instead of re-implementing scaffolding.
-  `just-makeit` already does this well.
+    `just-makeit` already does this well.
 - **Templates as files**, not Python heredocs. Diffs against real generated
-  projects stay readable.
+    projects stay readable.
