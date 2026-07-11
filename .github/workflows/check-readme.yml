@@ -1,0 +1,24 @@
+name: Check org README content
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - profile/README.md
+      - README.md
+      - .github/workflows/check-readme.yml
+      - .github/scripts/check-readme-content.sh
+  schedule:
+    # Weekly — catches drift from the *other* side: an alias removed from
+    # aliases.toml, a repo renamed, a PyPI package yanked. Nothing here
+    # changed, but the world the links point at did.
+    - cron: "0 13 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check profile/README.md
+        run: .github/scripts/check-readme-content.sh profile/README.md
