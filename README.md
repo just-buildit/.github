@@ -17,8 +17,8 @@ tooling pulls the rest on demand.
 | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
 | [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jb`) | Fast ephemeral script runner                    | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` |
 | [**just-bashit**](https://github.com/just-buildit/just-bashit)                                            | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"`                     |
-| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                     | Python C extensions out-of-the-box              | `jbx get-just-makeit`                                     |
-| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                          | Zero-dep PEP 517 build backend for C extensions | `jbx get-just-buildit`                                    |
+| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                     | Python C extensions out-of-the-box              | `pip install just-makeit`                                 |
+| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                          | Zero-dep PEP 517 build backend for C extensions | `pip install just-buildit`                                |
 
 Each tool stands alone. They also compose.
 
@@ -26,10 +26,11 @@ Each tool stands alone. They also compose.
 
 **Greenfield Python+C extension** — `just-makeit new` stands up a
 complete project: C source, headers, CMakeLists, Python bindings, type
-stubs, tests, benchmarks, and CI — all green on the first `make test`.
-The build backend is `just-buildit`; the system-dep and tool manifests
-(`jb-deps.toml`, `jb.toml`) are dropped in pre-populated so the next
-contributor lands running. You write the algorithm; nothing else.
+stubs, tests, and benchmarks — all green on the first `make test`.
+The build backend is `just-buildit`; the tool manifest (`jb.toml`, with
+system build deps folded in under `[dev.*]`) is dropped in pre-populated
+so the next contributor lands running. You write the algorithm; nothing
+else.
 
 **Any project, anywhere** — drop a `jb-deps.toml` at the repo root and
 run `jbx install-deps`. System packages for apt/pacman/brew/dnf/zypper/msys2
@@ -50,8 +51,9 @@ a curated `aliases.toml`. `jbx install-deps` just works; `jbx gh:user/repo/tool`
 # Get the universal entrypoint (installs jb + jbx) — only curl line you need
 . <(curl -sSL https://just-buildit.github.io/get-jb.sh)
 
-# Stand up a Python+C extension (drops jb-deps.toml + jb.toml with sane defaults)
-jbx get-just-makeit
+# Install just-makeit, then stand up a Python+C extension
+# (drops a jb.toml with build deps pre-populated under [dev.*])
+pip install just-makeit
 just-makeit new my_project --object engine --state gain:double:1.0
 cd my_project
 
@@ -125,8 +127,8 @@ config = "just-makeit.toml"
 
 ```toml
 [aliases]
-install-deps   = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/just_bashit/install-deps.sh"
-get-just-runit = "https://raw.githubusercontent.com/just-buildit/just-bashit/main/src/just_bashit/get-jb.sh"
+install-deps = "https://just-buildit.github.io/jbs/install-deps.sh"
+get-jb       = "https://just-buildit.github.io/get-jb.sh"
 # Third-party tools welcomed via PR.
 ```
 
