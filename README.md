@@ -168,6 +168,101 @@ get-jb       = "https://just-buildit.github.io/get-jb.sh"
 - [ ] `jb-deps.toml` / `jb.toml` schemas — JSON Schema for editor completion
 - [ ] CHANGELOG hygiene across repos is uneven
 
+______________________________________________________________________
+
+## Makefile standard — cross-org plan
+
+One `standard.mk` every repo includes, with per-repo variation expressed as
+configuration rather than as a fork. Design RFC and full rationale:
+[doppler-dsp/doppler#555](https://github.com/doppler-dsp/doppler/issues/555).
+
+**Scope:** all repos in `just-buildit` and `doppler-dsp`. **Canonical home:**
+this org (`just-buildit`) — it is already a dependency of every repo's CI
+bootstrap, so hosting the standard here adds no new relationship.
+
+### Problem
+
+A written convention exists (`skills://makefile-convention`) and every repo
+hand-implements it, so they drift. Measured 2026-07-30:
+
+|                                 | doppler | just-makeit |
+| ------------------------------- | ------- | ----------- |
+| targets defined                 | 50      | 27          |
+| targets shared between the two  | 18      | 18          |
+| listed by `make help`           | 30      | 22          |
+| CI `run:` steps invoking `make` | 12 / 83 | 4 / 71      |
+
+Concrete consequences, all live: doppler has no `format` target; the same
+benchmark concepts are named `bench-baseline`/`bench-check` in one repo and
+`bench-save`/`bench-compare` in the other; `zensical build --strict` is
+implemented in three places that disagree, and every doppler PR builds the docs
+site twice; `make wheel` is in `.PHONY` and in `help` with no rule, so it exits
+0 having done nothing.
+
+### The standard
+
+Universal (8): `all help setup clean test test-fast lint format`, plus one
+`lint-<tool>` dispatch target per configured tool. Feature groups defined only
+when flagged — `HAS_DOCS`, `HAS_C`, `HAS_DOXYGEN`, `HAS_PYTHON`, `HAS_RUST`,
+`HAS_BENCH`, `HAS_COVERAGE`, `HAS_RELEASE` — plus the `test-all` / `gates`
+aggregates. **Cap: 36 targets with every flag on.**
+
+- **Dispatch is required, not optional.** `.pre-commit-config.yaml` calls
+    `make -s lint-<tool>`; the Makefile invokes `$(DEV_RUN) <tool>`; `uv.lock`
+    pins the version. This is what makes local and CI resolve identically, so a
+    hand-pinned `additional_dependencies` list becomes unnecessary.
+- **`help` is generated** from `##` comments, never hand-maintained.
+- **`release` is reserved** for the C build type (`clean` + `build   BUILD_TYPE=Release`). The release *workflow* is `ship` / `tag-release`.
+- **Naming is `<noun>-<qualifier>`**, making the noun a namespace:
+    `test-python`, `test-rust`, `version-check`. `make test-<TAB>` then completes
+    the whole family.
+- **`local.mk`** is included if present and may only *add* targets, never
+    redefine a standard one — otherwise it becomes the fork this prevents.
+
+### Success criteria
+
+Measured against the 2026-07-30 baseline above:
+
+| #   | criterion                                                      | today        | target      |
+| --- | -------------------------------------------------------------- | ------------ | ----------- |
+| 1   | repo Makefile holds only config + genuinely local targets      | 50 / 27      | ≤14 / ≤4    |
+| 2   | `make help` lists every target, and every listed target exists | 60% / 81%    | 100% / 100% |
+| 3   | ghost targets (`.PHONY` with no rule)                          | 1 / 0        | 0 / 0       |
+| 4   | CI `run:` steps are `make <target>` or environment plumbing    | 12/83 / 4/71 | 100% / 100% |
+| 5   | `zensical build --strict` implementations                      | 3            | 1           |
+| 6   | docs site builds per doppler PR                                | 2            | 1           |
+| 7   | hand-pinned `additional_dependencies` for lock-managed tools   | yes          | none        |
+| 8   | editing vendored `standard.mk` fails `make lint`               | n/a          | both repos  |
+| 9   | `make <standard target>` behaves identically across repos      | no           | yes         |
+
+Criteria 2, 3 and 8 are enforced by gates rather than by review, so they cannot
+regress silently — which is the point, since none of the problems above were
+decided, they accumulated.
+
+### Phases
+
+- [ ] **P0 — prototype** `standard.mk` in just-makeit; vendored, drift gate
+    inert until P1 publishes canonical *(just-makeit)*
+- [ ] **P1 — publish** canonical `standard.mk` in this org; wire the drift gate
+    live *(just-buildit)*
+- [ ] **P2 — doppler port**: `docs-check` first (deletes the three-way
+    divergence and the double site build in one commit), then `lint-<tool>`
+    dispatch, then ghost/backfill/renames *(doppler)*
+- [ ] **P3 — convention doc** updated to match, landing *with* P2 — until
+    `standard.mk` exists, the doc describing the old names is still accurate
+    *(doppler)*
+- [ ] **P4 — CI port** per repo: call standard targets, delete each inline
+    duplicate in the same commit *(per repo)*
+
+### Non-goals
+
+- Not a rewrite of target semantics — the convention already defines them; this
+    implements them once instead of N times.
+- Not removing repo-specific targets. doppler keeps `specan`, `gallery`,
+    `record-demo`, `blazing` and its bench scripts.
+- Not a general fix for environment drift. Dispatch closes it for lock-managed
+    Python tools; anything resolved outside the lock is still on its own.
+
 ## Decision log
 
 - **`jb-deps.toml` beats stdin** when both are present. TTY detection
