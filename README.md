@@ -232,14 +232,15 @@ memory — see criterion 10.
     the whole family.
 - **`local.mk`** is included if present and may only *add* targets, never
     redefine a standard one — otherwise it becomes the fork this prevents.
-- **The drift gate compares against a cache, so offline works.** `make lint`
-    checks the vendored copy against a cached canonical at
-    `${XDG_CACHE_HOME:-~/.cache}/just-buildit/standard.mk`, refreshing it when
-    missing or stale. A failed fetch falls back to the existing cache rather
-    than failing the gate, so no network is not a broken `make lint`; a genuine
-    difference still fails. On a fresh clone with no cache *and* no network the
-    check reports that it could not run — CI always has both, so the gate is
-    authoritative exactly where it is enforced.
+- **The drift gate fetches canonical every time, and a failed fetch fails the
+    gate.** `make lint` compares the vendored copy against
+    <https://just-buildit.github.io/standard.mk>. There is no cache: a cache
+    would mean the most likely failure — the fetch failing while the network is
+    fine (CDN outage, a bad deploy, a 404 after a rename) — silently degrades
+    into "compared against something older", and one bad deploy would disable
+    the drift gate across every repo at once with nothing going red. A gate that
+    cannot reach its reference has not passed; it has not run, and it says so by
+    failing. That is the same reason the gate fails rather than warns.
 
 ### Required files
 
