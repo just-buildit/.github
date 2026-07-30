@@ -176,9 +176,17 @@ One `standard.mk` every repo includes, with per-repo variation expressed as
 configuration rather than as a fork. Design RFC and full rationale:
 [doppler-dsp/doppler#555](https://github.com/doppler-dsp/doppler/issues/555).
 
-**Scope:** all repos in `just-buildit` and `doppler-dsp`. **Canonical home:**
-this org (`just-buildit`) — it is already a dependency of every repo's CI
-bootstrap, so hosting the standard here adds no new relationship.
+**Scope:** all repos in `just-buildit` and `doppler-dsp`.
+
+**Canonical home:** `just-buildit.github.io`, served at
+<https://just-buildit.github.io/standard.mk> and hand-edited beside
+`aliases.toml`. It must not live in a repo that *consumes* the standard, which
+rules out doppler, just-makeit **and `just-buildit/just-buildit`** — the last
+of those has a `Makefile` of its own, so it is an adopter like any other. The
+org-pages root is a non-consumer whose stated charter is already "the small
+static resources the toolchain depends on", and serving from the CDN keeps the
+drift gate to a single `curl` with no clone, no auth, and no raw.githubusercontent
+rate limit — the same reason the `jbs/` libs were moved there.
 
 ### Problem
 
@@ -224,6 +232,14 @@ memory — see criterion 10.
     the whole family.
 - **`local.mk`** is included if present and may only *add* targets, never
     redefine a standard one — otherwise it becomes the fork this prevents.
+- **The drift gate compares against a cache, so offline works.** `make lint`
+    checks the vendored copy against a cached canonical at
+    `${XDG_CACHE_HOME:-~/.cache}/just-buildit/standard.mk`, refreshing it when
+    missing or stale. A failed fetch falls back to the existing cache rather
+    than failing the gate, so no network is not a broken `make lint`; a genuine
+    difference still fails. On a fresh clone with no cache *and* no network the
+    check reports that it could not run — CI always has both, so the gate is
+    authoritative exactly where it is enforced.
 
 ### Required files
 
