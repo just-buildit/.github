@@ -204,8 +204,14 @@ site twice; `make wheel` is in `.PHONY` and in `help` with no rule, so it exits
 Universal (8): `all help setup clean test test-fast lint format`, plus one
 `lint-<tool>` dispatch target per configured tool. Feature groups defined only
 when flagged — `HAS_DOCS`, `HAS_C`, `HAS_DOXYGEN`, `HAS_PYTHON`, `HAS_RUST`,
-`HAS_BENCH`, `HAS_COVERAGE`, `HAS_RELEASE` — plus the `test-all` / `gates`
-aggregates. **Cap: 36 targets with every flag on.**
+`HAS_BENCH`, `HAS_COVERAGE`, `HAS_RELEASE`, `HAS_EXAMPLES` — plus `test-all` / `gates`
+aggregates. **Cap: 38 targets with every flag on.**
+
+`install-deps` is universal (system packages via `jbx install-deps`; a no-op
+where a repo declares none) and is distinct from `setup`, which installs
+*project* deps. `test-examples` sits in `HAS_EXAMPLES`. Both were added after
+the list was checked against the measured union rather than assembled from
+memory — see criterion 10.
 
 - **Dispatch is required, not optional.** `.pre-commit-config.yaml` calls
     `make -s lint-<tool>`; the Makefile invokes `$(DEV_RUN) <tool>`; `uv.lock`
@@ -223,26 +229,40 @@ aggregates. **Cap: 36 targets with every flag on.**
 
 Measured against the 2026-07-30 baseline above:
 
-| #   | criterion                                                      | today        | target      |
-| --- | -------------------------------------------------------------- | ------------ | ----------- |
-| 1   | repo Makefile holds only config + genuinely local targets      | 50 / 27      | ≤14 / ≤4    |
-| 2   | `make help` lists every target, and every listed target exists | 60% / 81%    | 100% / 100% |
-| 3   | ghost targets (`.PHONY` with no rule)                          | 1 / 0        | 0 / 0       |
-| 4   | CI `run:` steps are `make <target>` or environment plumbing    | 12/83 / 4/71 | 100% / 100% |
-| 5   | `zensical build --strict` implementations                      | 3            | 1           |
-| 6   | docs site builds per doppler PR                                | 2            | 1           |
-| 7   | hand-pinned `additional_dependencies` for lock-managed tools   | yes          | none        |
-| 8   | editing vendored `standard.mk` fails `make lint`               | n/a          | both repos  |
-| 9   | `make <standard target>` behaves identically across repos      | no           | yes         |
+| #   | criterion                                                                    | today        | target      |
+| --- | ---------------------------------------------------------------------------- | ------------ | ----------- |
+| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | ≤18 / ≤1    |
+| 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% |
+| 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       |
+| 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% |
+| 5   | `zensical build --strict` implementations                                    | 3            | 1           |
+| 6   | docs site builds per doppler PR                                              | 2            | 1           |
+| 7   | hand-pinned `additional_dependencies` for lock-managed tools                 | yes          | none        |
+| 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  |
+| 9   | `make <standard target>` behaves identically across repos                    | no           | yes         |
+| 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           |
 
 Criteria 2, 3 and 8 are enforced by gates rather than by review, so they cannot
 regress silently — which is the point, since none of the problems above were
-decided, they accumulated.
+decided, they accumulated. `make wheel` had been exiting 0 with no rule behind
+it in a repo that already had a `make lint` gate, CI on every PR, and a `help`
+entry advertising it: every human control was in place, and none of them caught
+it.
+
+Criterion 10 applies the same lesson to the standard's own scope. Three targets
+shared by both repos — `release-branch`, `test-examples`, `install-deps` — were
+each missed while the list was written from memory, and each was found by
+recomputing the union from the two Makefiles. The list is therefore **derived by
+script from the measured union of adopting repos**, and the invariant "no target
+shared by two or more repos sits outside the standard" is checked rather than
+reasoned about.
 
 ### Phases
 
 - [ ] **P0 — prototype** `standard.mk` in just-makeit; vendored, drift gate
-    inert until P1 publishes canonical *(just-makeit)*
+    inert until P1 publishes canonical. Also collapses just-makeit's `install`
+    (`uv sync --group dev`) into `setup`, of which it is a strict subset, so a
+    fourth deps-ish name never reaches the standard *(just-makeit)*
 - [ ] **P1 — publish** canonical `standard.mk` in this org; wire the drift gate
     live *(just-buildit)*
 - [ ] **P2 — doppler port**: `docs-check` first (deletes the three-way
