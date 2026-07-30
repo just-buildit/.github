@@ -225,6 +225,25 @@ memory — see criterion 10.
 - **`local.mk`** is included if present and may only *add* targets, never
     redefine a standard one — otherwise it becomes the fork this prevents.
 
+### Required files
+
+Each file owns exactly one concern; nothing states a tool's invocation twice.
+
+| File                      | Purpose                                                                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Makefile`                | Configuration only — feature flags, path and tool overrides, `include standard.mk`, and repo-local targets. Nothing shared lives here.                                         |
+| `standard.mk`             | The shared targets, vendored verbatim. Never edited in-repo: the drift gate fails `make lint` on any difference from canonical.                                                |
+| `local.mk`                | Optional. Included if present; may only *add* targets, never redefine a standard one — otherwise it becomes the fork this prevents.                                            |
+| `pyproject.toml`          | **Which** tools, at **what** versions (the `dev` group).                                                                                                                       |
+| `uv.lock`                 | Pins those versions, committed. This is what makes local and CI resolve identically, and so what lets dispatch close the environment-drift class.                              |
+| `.pre-commit-config.yaml` | **When** a check fires. Dispatches inward (`entry: make -s lint-<tool>`, `language: system`) and resolves no tool versions itself.                                             |
+| `jb.toml`                 | Tool manifest, with system packages folded in under `[dev.<manager>]` and consumed by `install-deps`. (`jb-deps.toml` is the standalone alternative for repos that prefer it.) |
+| `.github/workflows/*.yml` | Calls `make <target>`. Anything else must be provably environment plumbing — runner setup, artifact transport, release packaging.                                              |
+
+**Adoption adds exactly one file.** Both repos already carry `Makefile`,
+`pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml` and `jb.toml` today;
+only `standard.mk` is new, and `local.mk` is optional and so far unneeded.
+
 ### Success criteria
 
 Measured against the 2026-07-30 baseline above:
