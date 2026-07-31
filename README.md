@@ -265,7 +265,7 @@ Each file owns exactly one concern; nothing states a tool's invocation twice.
 | File                      | Purpose                                                                                                                                                                                                                                                          |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Makefile`                | Configuration only — feature flags, path and tool overrides, `include standard.mk`, and repo-local targets. Nothing shared lives here.                                                                                                                           |
-| `standard.mk`             | The shared targets, vendored verbatim. Never edited in-repo: the drift gate fails `make lint` on any difference from canonical.                                                                                                                                  |
+| `standard.mk`             | The shared targets, vendored verbatim **by fetching canonical** (see below). Never edited in-repo: the drift gate fails `make lint` on any difference from canonical.                                                                                            |
 | `local.mk`                | Optional. Included if present; may only *add* targets, never redefine a standard one — otherwise it becomes the fork this prevents.                                                                                                                              |
 | `pyproject.toml`          | **Which** tools, at **what** versions (the `dev` group).                                                                                                                                                                                                         |
 | `uv.lock`                 | Pins those versions, committed. This is what makes local and CI resolve identically, and so what lets dispatch close the environment-drift class.                                                                                                                |
@@ -276,6 +276,35 @@ Each file owns exactly one concern; nothing states a tool's invocation twice.
 **Adoption adds exactly one file.** Both repos already carry `Makefile`,
 `pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml` and `jb.toml` today;
 only `standard.mk` is new, and `local.mk` is optional and so far unneeded.
+
+**Adoption means `curl` canonical — never `cp` a sibling.**
+
+```sh
+curl -fsSL -o standard.mk https://just-buildit.github.io/standard.mk
+```
+
+That is the whole of it: there is no line to add, because `STANDARD_URL`
+defaults to canonical *inside* the file. Vendoring is what arms the drift gate.
+
+The failure mode this rules out is not hypothetical — it is how the second
+adopter ended up unguarded on day one. doppler adopted by taking the file from
+just-makeit's working tree, which at that moment held the pre-publication copy
+where `STANDARD_URL` was still empty and opt-in. The result passed every gate
+and reported `standard-check: inert`, which reads like a pass, so nothing went
+red anywhere: doppler ran for a day with **no drift protection at all** while
+its `make lint` was green. Fixed by re-vendoring
+([doppler-dsp/doppler#559](https://github.com/doppler-dsp/doppler/pull/559)).
+
+Two consequences worth stating, since both cost time:
+
+- **Arming-by-default only protects an adopter that vendors the *current*
+    canonical.** A copy taken from another repo carries whatever that repo had
+    at the time, including an older arming policy — so the copy silently
+    reintroduces the fail-open the default exists to prevent.
+- **After a change to canonical, adopters do not update themselves.** Their
+    gate goes red, which is correct and is the point; the fix is to re-fetch,
+    never to edit the vendored copy. An adopter whose gate is *inert* is the
+    one case that will not tell you.
 
 ### Success criteria
 
