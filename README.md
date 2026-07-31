@@ -312,7 +312,7 @@ Measured against the 2026-07-30 baseline above:
 
 | #   | criterion                                                                    | today        | target      |
 | --- | ---------------------------------------------------------------------------- | ------------ | ----------- |
-| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | ≤18 / ≤1    |
+| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | 0 shared    |
 | 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% |
 | 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       |
 | 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% |
@@ -322,6 +322,14 @@ Measured against the 2026-07-30 baseline above:
 | 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  |
 | 9   | `make <standard target>` behaves identically across repos                    | no           | yes         |
 | 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           |
+
+Criterion 1 is a **property, not a count**: no shared target defined in a repo
+Makefile, and every local one declared in `LOCAL_TARGETS`. It was originally
+written as "≤18 / ≤1", but a local-target count is not a quality signal — a
+repo legitimately grows local targets (doppler added seven binary-hygiene gates
+in a single afternoon), and a criterion that goes stale on healthy activity
+gets ignored rather than fixed. What must not drift is criterion 10, the
+*shared* set.
 
 Criteria 2, 3 and 8 are enforced by gates rather than by review, so they cannot
 regress silently — which is the point, since none of the problems above were
