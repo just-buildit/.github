@@ -308,10 +308,9 @@ Two consequences worth stating, since both cost time:
 
 ### Success criteria
 
-Measured against the 2026-07-30 baseline above:
-
-Values are doppler / just-makeit. **Status as of 2026-07-31**, every number
-re-measured rather than carried forward:
+Values are doppler / just-makeit, against the 2026-07-30 baseline above.
+**Status as of 2026-07-31**, every number re-measured rather than carried
+forward:
 
 | #   | criterion                                                                    | baseline     | target      | now                | |
 | --- | ---------------------------------------------------------------------------- | ------------ | ----------- | ------------------ | --- |
