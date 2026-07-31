@@ -213,7 +213,23 @@ Universal (9): `all help setup clean test test-fast lint format install-deps`,
 plus one `lint-<tool>` dispatch target per configured tool. Feature groups
 defined only when flagged — `HAS_DOCS`, `HAS_C`, `HAS_DOXYGEN`, `HAS_PYTHON`, `HAS_RUST`,
 `HAS_BENCH`, `HAS_COVERAGE`, `HAS_RELEASE`, `HAS_EXAMPLES` — plus `test-all` / `gates`
-aggregates. **Cap: 38 targets with every flag on.**
+aggregates.
+
+**Cap, with every flag on: 35 user-facing + N dispatch + 3 enforcement.** The
+three counts are separate because they scale differently — `N` is per-repo (the
+tools that repo configures) and the enforcement gates are fixed — and stating
+them as one number is how a cap stops being a check. It had already happened
+here: this line read "38 targets", the P0 prototype measured 38, and the two
+were different sets of 38. The plan was counting `lint-<tool>` and not the
+enforcement gates, and P0 counted the reverse, so two offsetting errors agreed.
+
+The 35 is the [#555](https://github.com/doppler-dsp/doppler/issues/555) group
+table summed: 9 universal + 2 aggregates + 24 across the nine groups
+(`HAS_DOCS` 3, `HAS_C` 3, `HAS_DOXYGEN` 2, `HAS_PYTHON` 3, `HAS_RUST` 1,
+`HAS_BENCH` 3, `HAS_COVERAGE` 2, `HAS_RELEASE` 6, `HAS_EXAMPLES` 1). Check a
+build against that table **target-for-target, not in total** — summing to the
+right number is what hid this. Repo-local targets (`LOCAL_TARGETS`) are outside
+the cap by definition: they are what criterion 1 bounds.
 
 `install-deps` is universal (system packages via `jbx install-deps`; a no-op
 where a repo declares none) and is distinct from `setup`, which installs
