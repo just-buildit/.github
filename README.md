@@ -381,16 +381,71 @@ reasoned about.
     side effect — a Pages outage reddens `lint` org-wide rather than silently
     comparing against something older.
 
-- [ ] **P2 — doppler port**: `docs-check` first (deletes the three-way
+- [x] **P2 — doppler port**: `docs-check` first (deletes the three-way
     divergence and the double site build in one commit), then `lint-<tool>`
-    dispatch, then ghost/backfill/renames *(doppler)*
+    dispatch, then ghost/backfill/renames *(doppler)* — **done**,
+    [doppler-dsp/doppler#558](https://github.com/doppler-dsp/doppler/pull/558)
+    plus four follow-ups (#559 re-vendor, #560 criterion 6, #561 the CI-only
+    gates, #562 the binary gates). 50 hand-maintained targets became **0 shared
+    + 25 genuinely doppler's own**; `help` went from 30-of-50 (advertising two
+    that did not work) to 67-of-67 generated.
 
-- [ ] **P3 — convention doc** updated to match, landing *with* P2 — until
+    Two things the port could not express, both worked around in the repo
+    rather than by editing the vendored copy, and both feeding the next
+    canonical change:
+
+    - **`docs-check` cannot accumulate.** The strict build is its own recipe
+        line, so a build failure aborts the target — fatal where the gate
+        exists to report *every* failure in one pass with a link checker last.
+        Worked around with `DOCS_CHECK_BUILD_CMD = :`.
+    - **The build step has no flag surface.** `CMAKE_FLAGS` reaches configure
+        only, so an adopting C repo silently drops from N jobs to one. doppler
+        would have gone 20 → 1. Covered by `export CMAKE_BUILD_PARALLEL_LEVEL`,
+        which reaches every `cmake --build` rather than one recipe.
+
+    And a trap worth the plan carrying: doppler adopted by **copying
+    just-makeit's working tree**, which held the pre-publication file, so it
+    shipped with the gate inert — reporting a notice that reads like a pass —
+    and ran a full day unguarded with `make lint` green. See *Adoption means
+    `curl` canonical* above; that rule exists because of this.
+
+- [x] **P3 — convention doc** updated to match, landing *with* P2 — until
     `standard.mk` exists, the doc describing the old names is still accurate
-    *(doppler)*
+    *(doppler)* — **done**, `skills://makefile-convention` rewritten alongside
+    #558, plus the four sibling skills that named the renamed targets.
 
 - [ ] **P4 — CI port** per repo: call standard targets, delete each inline
-    duplicate in the same commit *(per repo)*
+    duplicate in the same commit *(per repo)* — **in progress**, and the
+    measured state differs sharply by repo:
+
+    | repo | `run:` steps | `make` | plumbing | unclassified |
+    | --- | --- | --- | --- | --- |
+    | doppler | 74 | 29 | 39 | **6** |
+    | just-makeit | 71 | 5 | 24 | **42** |
+
+    doppler is substantially done: every gate in `ci.yml` and `docs.yml` now
+    calls a target, including four that had never been runnable outside CI
+    (`abi-check`, `link-check`, `glibc-check`, `specan-check`) and the doc
+    gates (`test-stubs`, `test-api-docs`, `test-snippets`). Of its remaining
+    6, three are CI-native (apt inside the Debian container, the
+    `needs.*.result` aggregator, `cmake --install` packaging) and three are
+    release-path — deliberately deferred, because those steps only execute
+    during a release, so an error there is invisible until it is expensive.
+    Best ported when a release will exercise them immediately.
+
+    just-makeit is largely unstarted. Most of its 42 are `artifact.yml`'s
+    scaffold-smoke steps, which drive the **jm CLI** rather than the repo's own
+    build — whether those are "plumbing" or want targets is the per-repo
+    judgement P4 asks for, not an omission.
+
+    Two duplications P4 surfaced that a target-count audit would have missed,
+    both in doppler and both now fixed: `docs.yml` reimplemented
+    `make gen-c-api` inline and had already diverged (**`uv run mkdocs` vs
+    `uv run --group docs mkdocs`**, and a `cp` that *merged* where the target
+    *replaces* — so a deleted C symbol's page survived forever in the deployed
+    site while vanishing locally); and `make test-python` selected a different
+    set of tests from CI's pytest, which is the RFC's own complaint surviving
+    the port that was supposed to end it.
 
 ### Non-goals
 
