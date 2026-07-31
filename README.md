@@ -311,10 +311,17 @@ reasoned about.
 
 ### Phases
 
-- [ ] **P0 — prototype** `standard.mk` in just-makeit; vendored, drift gate
+- [x] **P0 — prototype** `standard.mk` in just-makeit; vendored, drift gate
     inert until P1 publishes canonical. Also collapses just-makeit's `install`
     (`uv sync --group dev`) into `setup`, of which it is a strict subset, so a
-    fourth deps-ish name never reaches the standard *(just-makeit)*
+    fourth deps-ish name never reaches the standard *(just-makeit)* —
+    **done**, [just-buildit/just-makeit#636](https://github.com/just-buildit/just-makeit/pull/636).
+    Prototyping in one repo before publishing paid for itself twice: the file
+    rejected the GNU make 3.81 that macOS ships, and the gates parsed a
+    `make -p` database whose wording changed in 3.82. Both would have gone out
+    to every adopter at once. **P1 must publish the post-review file**, which also
+    carries `coverage-gate`, `HAS_EXAMPLES` reduced to `test-examples`, and
+    `all` defaulting to `build` where `HAS_C`.
 - [ ] **P1 — publish** canonical `standard.mk` in this org; wire the drift gate
     live *(just-buildit)*
 - [ ] **P2 — doppler port**: `docs-check` first (deletes the three-way
