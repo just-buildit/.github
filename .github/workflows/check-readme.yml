@@ -8,6 +8,13 @@ on:
       - README.md
       - .github/workflows/check-readme.yml
       - .github/scripts/check-readme-content.sh
+  # No path filter on pull_request, deliberately. The `main` ruleset requires
+  # the "CI passed" check below on every PR, so it has to run on every PR —
+  # a path filter would skip the job on an unrelated change and the required
+  # check would never arrive, leaving the PR unmergeable forever. (That is
+  # exactly what happened before this trigger existed: the ruleset required a
+  # check that no workflow here could ever report.)
+  pull_request:
   schedule:
     # Weekly — catches drift from the *other* side: an alias removed from
     # aliases.toml, a repo renamed, a PyPI package yanked. Nothing here
@@ -22,3 +29,30 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check profile/README.md
         run: .github/scripts/check-readme-content.sh profile/README.md
+
+  # ------------------------------------------------------------------
+  # Aggregator: the single "CI passed" check the `main` ruleset requires.
+  # Green only when every job above succeeded. Adding a job to this workflow
+  # means adding it to `needs:` here — otherwise the aggregator goes green
+  # while the new job is red, and the required check stops meaning anything.
+  # Mirrors doppler's ci.yml aggregator so the org has one shape.
+  # ------------------------------------------------------------------
+  ci-passed:
+    name: CI passed
+    needs:
+      - check
+    runs-on: ubuntu-latest
+    # `always()` so this job still runs when a dependency failed — otherwise it
+    # would be skipped, the required check would never report, and a red PR
+    # would look identical to an unmergeable one.
+    if: always()
+    steps:
+      - name: Require all jobs to have succeeded
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" || \
+                "${{ contains(needs.*.result, 'cancelled') }}" == "true" || \
+                "${{ contains(needs.*.result, 'skipped') }}" == "true" ]]; then
+            echo "::error::a required CI job did not succeed — CI not green"
+            exit 1
+          fi
+          echo "All required CI jobs succeeded."
