@@ -310,18 +310,37 @@ Two consequences worth stating, since both cost time:
 
 Measured against the 2026-07-30 baseline above:
 
-| #   | criterion                                                                    | today        | target      |
-| --- | ---------------------------------------------------------------------------- | ------------ | ----------- |
-| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | 0 shared    |
-| 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% |
-| 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       |
-| 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% |
-| 5   | `zensical build --strict` implementations                                    | 3            | 1           |
-| 6   | docs site builds per doppler PR                                              | 2            | 1           |
-| 7   | hand-pinned `additional_dependencies` for lock-managed tools                 | yes          | none        |
-| 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  |
-| 9   | `make <standard target>` behaves identically across repos                    | no           | yes         |
-| 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           |
+Values are doppler / just-makeit. **Status as of 2026-07-31**, every number
+re-measured rather than carried forward:
+
+| #   | criterion                                                                    | baseline     | target      | now                | |
+| --- | ---------------------------------------------------------------------------- | ------------ | ----------- | ------------------ | --- |
+| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | 0 shared    | **0 shared / 0 shared** | ✅ |
+| 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% | **100% / 100%**    | ✅ |
+| 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       | **0 / 0**          | ✅ |
+| 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% | **6 / 42** unclassified | ⬜ |
+| 5   | `zensical build --strict` implementations                                    | 3            | 1           | **1**              | ✅ |
+| 6   | docs site builds per doppler PR                                              | 2            | 1           | **1**              | ✅ |
+| 7   | hand-pinned `additional_dependencies` for lock-managed tools                 | yes          | none        | **none**           | ✅ |
+| 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  | **both**           | ✅ |
+| 9   | `make <standard target>` behaves identically across repos                    | no           | yes         | **byte-identical** | ✅ |
+| 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           | **0**              | ✅ |
+
+Nine of ten met. The one that is not:
+
+**Criterion 4 — P4, and honestly measured for the first time.** doppler is at
+6 unclassified of 74 (3 CI-native, 3 release-path deferred on purpose);
+just-makeit at 42 of 71, most of them `artifact.yml` scaffold-smoke steps that
+drive the jm CLI rather than the repo's own build. See P4 below.
+
+Criterion 1 is met in both repos under its corrected reading (see the
+property note below): neither Makefile defines a shared target, and every
+local one is declared in `LOCAL_TARGETS` — doppler 26 = 26, reconciliation
+enforced by `help-check`.
+
+Criterion 9 is now stronger than "behaves identically": both repos vendor the
+**same file, byte for byte** (`77fe8941…`), verified against canonical rather
+than against each other.
 
 Criterion 1 is a **property, not a count**: no shared target defined in a repo
 Makefile, and every local one declared in `LOCAL_TARGETS`. It was originally
