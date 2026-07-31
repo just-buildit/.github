@@ -322,14 +322,36 @@ reasoned about.
     to every adopter at once. **P1 must publish the post-review file**, which also
     carries `coverage-gate`, `HAS_EXAMPLES` reduced to `test-examples`, and
     `all` defaulting to `build` where `HAS_C`.
-- [ ] **P1 — publish** canonical `standard.mk` in this org; wire the drift gate
-    live *(just-buildit)*
+
+- [x] **P1 — publish** canonical `standard.mk` in this org; wire the drift gate
+    live *(just-buildit)* — **done**,
+    [just-buildit.github.io#9](https://github.com/just-buildit/just-buildit.github.io/pull/9)
+    serving at <https://just-buildit.github.io/standard.mk>, vendored back into
+    just-makeit by
+    [just-makeit#637](https://github.com/just-buildit/just-makeit/pull/637).
+    The gate is proven against the real remote, in CI as well as locally: a
+    matching copy passes, a one-character edit fails with the diff.
+
+    One design change from the plan. `STANDARD_URL` **defaults** to canonical
+    inside `standard.mk` rather than being set per adopter, because opt-in
+    fails open: a repo that vendors the file and forgets the line has no drift
+    protection and reports that as a notice reading like a pass, and nobody
+    greps for an absent line. Vendoring the file is what arms it; deliberate
+    opt-out is `STANDARD_URL =`, a line that exists and so can be found.
+
+    Consequence, stated because every adopter inherits it: **`make lint` now
+    requires network.** That is the RFC's tradeoff for refusing a cache, not a
+    side effect — a Pages outage reddens `lint` org-wide rather than silently
+    comparing against something older.
+
 - [ ] **P2 — doppler port**: `docs-check` first (deletes the three-way
     divergence and the double site build in one commit), then `lint-<tool>`
     dispatch, then ghost/backfill/renames *(doppler)*
+
 - [ ] **P3 — convention doc** updated to match, landing *with* P2 — until
     `standard.mk` exists, the doc describing the old names is still accurate
     *(doppler)*
+
 - [ ] **P4 — CI port** per repo: call standard targets, delete each inline
     duplicate in the same commit *(per repo)*
 
