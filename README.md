@@ -13,12 +13,12 @@ tooling pulls the rest on demand.
 
 ## Tools
 
-| Name                                                                                                      | Role                                            | Get it                                                    | Status                                                                                                                                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jb`) | Fast ephemeral script runner                    | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
-| [**just-bashit**](https://github.com/just-buildit/just-bashit)                                            | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"`                     | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
-| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                     | Python C extensions out-of-the-box              | `pip install just-makeit`                                 | [![PyPI](https://img.shields.io/pypi/v/just-makeit)](https://pypi.org/project/just-makeit/) [![CI](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml)     |
-| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                          | Zero-dep PEP 517 build backend for C extensions | `pip install just-buildit`                                | [![PyPI](https://img.shields.io/pypi/v/just-buildit)](https://pypi.org/project/just-buildit/) [![CI](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml) |
+| Name                                                                                                       | Role                                            | Get it                                                    | Status                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jbx`) | Fast ephemeral script runner                    | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
+| [**just-bashit**](https://github.com/just-buildit/just-bashit)                                             | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"`                     | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
+| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                      | Python C extensions out-of-the-box              | `pip install just-makeit`                                 | [![PyPI](https://img.shields.io/pypi/v/just-makeit)](https://pypi.org/project/just-makeit/) [![CI](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml)     |
+| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                           | Zero-dep PEP 517 build backend for C extensions | `pip install just-buildit`                                | [![PyPI](https://img.shields.io/pypi/v/just-buildit)](https://pypi.org/project/just-buildit/) [![CI](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml) |
 
 Each tool stands alone. They also compose.
 
@@ -27,12 +27,12 @@ Each tool stands alone. They also compose.
 **Greenfield Python+C extension** — `just-makeit new` stands up a
 complete project: C source, headers, CMakeLists, Python bindings, type
 stubs, tests, and benchmarks — all green on the first `make test`.
-The build backend is `just-buildit`; the tool manifest (`jb.toml`, with
-system build deps folded in under `[dev.*]`) is dropped in pre-populated
-so the next contributor lands running. You write the algorithm; nothing
-else.
+The build backend is `just-buildit`; the bootstrap manifest
+(`bootstrap.toml`, carrying the `[tools.*]` table and the system build
+deps under `[dev.*]`) is dropped in pre-populated so the next
+contributor lands running. You write the algorithm; nothing else.
 
-**Any project, anywhere** — drop a `jb-deps.toml` at the repo root and
+**Any project, anywhere** — drop a `bootstrap.toml` at the repo root and
 run `jbx install-deps`. System packages for apt/pacman/brew/dnf/zypper/msys2
 are detected and installed. No Python, no Docker, no setup.
 
@@ -48,11 +48,11 @@ a curated `aliases.toml`. `jbx install-deps` just works; `jbx gh:user/repo/tool`
 ## Get started
 
 ```sh
-# Get the universal entrypoint (installs jb + jbx) — only curl line you need
+# Get the universal entrypoint (installs just-runit + jbx) — only curl line you need
 . <(curl -sSL https://just-buildit.github.io/get-jb.sh)
 
 # Install just-makeit, then stand up a Python+C extension
-# (drops a jb.toml with build deps pre-populated under [dev.*])
+# (drops a bootstrap.toml with build deps pre-populated under [dev.*])
 pip install just-makeit
 just-makeit new my_project --object engine --state gain:double:1.0
 cd my_project
@@ -70,22 +70,23 @@ MIT across all repos.
 
 ______________________________________________________________________
 
-______________________________________________________________________
-
 # Internal — roadmap & gaps
 
 > Below the fold: planning notes for contributors. External readers can stop here.
 
 ## Design conventions
 
-- **`jb-deps.toml`** — declarative system-package list grouped by purpose
-    (`runtime`, `dev`) and package manager (`apt`, `pacman`, `brew`,
-    `dnf`, `zypper`, `msys2`). Lives at repo root; auto-discovered by
-    `jbx install-deps`.
-- **`jb.toml`** — explicit list of `jb`/`jbx` tools a project depends on,
-    analogous to `[project.dependencies]`. Lives at repo root in every
-    project type (Python, C, bare). `pyproject.toml` keeps its packaging
-    job, `jb.toml` keeps its tool job.
+- **`bootstrap.toml`** — what must exist BEFORE the language ecosystem's
+    own package manager can run: system packages, and the `jbx` tools a
+    project depends on. Lives at repo root in every project type (Python, C,
+    bare). `pyproject.toml` keeps its packaging job; this keeps the bootstrap
+    job. Named for what it declares, not for a tool — `jb` reads as
+    just-buildit, the PEP 517 backend, which never opens it. It carries
+    both halves: the declarative system-package list grouped by purpose
+    (`runtime`, `dev`) and package manager (`apt`, `pacman`, `brew`, `dnf`,
+    `zypper`, `msys2`), and the `[tools.*]` table. `jb.toml` and
+    `jb-deps.toml` are the deprecated former names, still read with a
+    warning.
 - **Namespaced invocation** — `jbx [NS:]NAME`. A namespace resolves to a
     single base URL. Default namespace = `just-buildit`. Built-in prefixes:
     `just-bashit:`, `gh:`, `https://`.
@@ -93,20 +94,11 @@ ______________________________________________________________________
     names to URLs. `jbx some-tool` consults the alias table when there is
     no script at `${NS_URL}/some-tool[.sh|.py]`.
 - **`install-deps.sh`** — thin per-project shim that delegates to `jbx install-deps`. Optional — `jbx install-deps` works directly when
-    `jb-deps.toml` is present.
+    `bootstrap.toml` is present.
 
 ## Schemas
 
-### `jb-deps.toml`
-
-```toml
-[runtime.apt]    packages = ["libzmq3-dev", "libfftw3-dev"]
-[runtime.pacman] packages = ["zeromq", "fftw"]
-[dev.apt]        packages = ["build-essential", "cmake", "python3-dev"]
-[dev.pacman]     packages = ["base-devel", "cmake", "python"]
-```
-
-### `jb.toml`
+### `bootstrap.toml`
 
 ```toml
 [project]
@@ -114,13 +106,17 @@ name    = "my_project"
 version = "0.1.0"
 
 [tools.install-deps]
-source    = "just-bashit:install-deps"
-deps_file = "jb-deps.toml"
-groups    = ["runtime", "dev"]
+source = "just-bashit:install-deps"
+groups = ["runtime", "dev"]
 
 [tools.just-makeit]
 source = "just-bashit:just-makeit"
 config = "just-makeit.toml"
+
+[runtime.apt]    packages = ["libzmq3-dev", "libfftw3-dev"]
+[runtime.pacman] packages = ["zeromq", "fftw"]
+[dev.apt]        packages = ["build-essential", "cmake", "python3-dev"]
+[dev.pacman]     packages = ["base-devel", "cmake", "python"]
 ```
 
 ### `aliases.toml` (hosted at org-pages root)
@@ -136,7 +132,7 @@ get-jb       = "https://just-buildit.github.io/get-jb.sh"
 
 1. **Explicit `NS:` prefix** — `jbx gh:user/repo/x`, `jbx https://...`:
     skip everything below, resolve directly.
-1. **`[tools.NAME]` in `jb.toml`** (walking up from CWD) — use declared source.
+1. **`[tools.NAME]` in `bootstrap.toml`** (walking up from CWD) — use declared source.
 1. **Default namespace `aliases.toml`** — fetch (cached), look up `NAME`.
 1. **Default namespace direct hit** — HEAD `${NS_URL}/NAME.sh`, then `.py`.
 1. **Error** — name not found.
@@ -145,27 +141,31 @@ get-jb       = "https://just-buildit.github.io/get-jb.sh"
 
 ### Shipped
 
-- [x] `jb` / `jbx` / `just-buildit` naming; conflict detection for `jb`; stale `jr`/`jx` cleanup on reinstall
-- [x] `jb` top-level subcommand dispatch (`jb run` → runner; extensible for `jb install` etc.)
+- [x] `jb` / `jbx` / `just-buildit` naming; conflict detection for `jb`; stale `jr`/`jx` cleanup on reinstall — *superseded by the rename below; `jb` and `just-buildit` are no longer installed as runner names*
+- [x] `just-runit` subcommand dispatch (falls through to the SPEC runner; `jbx` never takes subcommands)
 - [x] Namespace model: bare NAME → default NS via `aliases.toml` then HEAD probe; `just-bashit:NAME` co-fetch
 - [x] Arg parsing: flags not captured as FUNC; FUNC validated via `declare -F`; verbose shadowing diagnostic
 - [x] Version-aware installer: fresh/upgrade/already-current; `JB_REINSTALL=1` escape hatch
 - [x] Org-pages site: themed, `aliases.toml`, mirror CI, `get-jb.sh` short URL
-- [x] `jb.toml` format defined; doppler carries one
+- [x] `bootstrap.toml` format defined; doppler carries one
 - [x] `jbs-deps.toml` auto-discovery in CWD
 
 ### In flight
 
 - [x] **Rename `jbs-deps.toml` → `jb-deps.toml`** across just-bashit source, docs, doppler
-- [x] **`jb install`** — reads `jb.toml`, walks up from CWD, pre-fetches every declared tool into cache
-- [x] **`just-makeit new` emits `jb.toml`** with dev deps pre-populated; `jbx install-deps -g dev` works immediately
+- [x] **Rename `jb.toml` / `jb-deps.toml` → `bootstrap.toml`**, and `jb` /
+    `just-buildit` stop naming the runner — one token had meant the org, the
+    PEP 517 backend, and the script runner at once. Old names still read,
+    with a warning (removal: just-bashit#30)
+- [x] **`just-runit install`** — reads `bootstrap.toml`, walks up from CWD, pre-fetches every declared tool into cache
+- [x] **`just-makeit new` emits `bootstrap.toml`** with dev deps pre-populated — shipped in just-makeit **0.57.0** (just-makeit#936, closing #935)
 - [ ] **User namespace config** — `~/.config/just-runit/namespaces.toml` for custom NS registration
 
 ### Gaps
 
 - [ ] **Parity `get-just-*.sh` scripts** — add `get-just-makeit.sh`, `get-just-bashit.sh`, `get-just-buildit.sh`
 - [ ] **`just-buildit init [--pep517|--bare|--c]`** — unified scaffold entry point
-- [ ] `jb-deps.toml` / `jb.toml` schemas — JSON Schema for editor completion
+- [ ] `bootstrap.toml` schema — JSON Schema for editor completion
 - [ ] CHANGELOG hygiene across repos is uneven
 
 ______________________________________________________________________
@@ -270,11 +270,11 @@ Each file owns exactly one concern; nothing states a tool's invocation twice.
 | `pyproject.toml`          | **Which** tools, at **what** versions (the `dev` group).                                                                                                                                                                                                         |
 | `uv.lock`                 | Pins those versions, committed. This is what makes local and CI resolve identically, and so what lets dispatch close the environment-drift class.                                                                                                                |
 | `.pre-commit-config.yaml` | **When** a check fires. Dispatches inward (`entry: make -s lint-<tool>`, `language: system`) and resolves no versions for lock-managed tools. Non-Python tools that cannot come from `uv.lock` — `clang-format`, `cmake-format` — keep their pinned `rev:` here. |
-| `jb.toml`                 | Tool manifest, with system packages folded in under `[dev.<manager>]` and consumed by `install-deps`. (`jb-deps.toml` is the standalone alternative for repos that prefer it.)                                                                                   |
+| `bootstrap.toml`          | Bootstrap manifest: the `[tools.*]` table, plus system packages under `[dev.<manager>]` consumed by `install-deps`. (`jb.toml` / `jb-deps.toml` are the deprecated former names, still read with a warning.)                                                     |
 | `.github/workflows/*.yml` | Calls `make <target>`. Anything else must be provably environment plumbing — runner setup, artifact transport, release packaging.                                                                                                                                |
 
 **Adoption adds exactly one file.** Both repos already carry `Makefile`,
-`pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml` and `jb.toml` today;
+`pyproject.toml`, `uv.lock`, `.pre-commit-config.yaml` and `bootstrap.toml` today;
 only `standard.mk` is new, and `local.mk` is optional and so far unneeded.
 
 **Adoption means `curl` canonical — never `cp` a sibling.**
@@ -312,18 +312,18 @@ Values are doppler / just-makeit, against the 2026-07-30 baseline above.
 **Status as of 2026-07-31**, every number re-measured rather than carried
 forward:
 
-| #   | criterion                                                                    | baseline     | target      | now                | |
-| --- | ---------------------------------------------------------------------------- | ------------ | ----------- | ------------------ | --- |
-| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | 0 shared    | **0 shared / 0 shared** | ✅ |
-| 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% | **100% / 100%**    | ✅ |
-| 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       | **0 / 0**          | ✅ |
-| 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% | **6 / 42** unclassified | ⬜ |
-| 5   | `zensical build --strict` implementations                                    | 3            | 1           | **1**              | ✅ |
-| 6   | docs site builds per doppler PR                                              | 2            | 1           | **1**              | ✅ |
-| 7   | hand-pinned `additional_dependencies` for lock-managed tools                 | yes          | none        | **none**           | ✅ |
-| 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  | **both**           | ✅ |
-| 9   | `make <standard target>` behaves identically across repos                    | no           | yes         | **byte-identical** | ✅ |
-| 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           | **0**              | ✅ |
+| #   | criterion                                                                    | baseline     | target      | now                     |     |
+| --- | ---------------------------------------------------------------------------- | ------------ | ----------- | ----------------------- | --- |
+| 1   | repo Makefile holds only config + genuinely local targets                    | 50 / 27      | 0 shared    | **0 shared / 0 shared** | ✅  |
+| 2   | `make help` lists every target, and every listed target exists               | 60% / 81%    | 100% / 100% | **100% / 100%**         | ✅  |
+| 3   | ghost targets (`.PHONY` with no rule)                                        | 1 / 0        | 0 / 0       | **0 / 0**               | ✅  |
+| 4   | CI `run:` steps are `make <target>` or environment plumbing                  | 12/83 / 4/71 | 100% / 100% | **6 / 42** unclassified | ⬜  |
+| 5   | `zensical build --strict` implementations                                    | 3            | 1           | **1**                   | ✅  |
+| 6   | docs site builds per doppler PR                                              | 2            | 1           | **1**                   | ✅  |
+| 7   | hand-pinned `additional_dependencies` for lock-managed tools                 | yes          | none        | **none**                | ✅  |
+| 8   | editing vendored `standard.mk` fails `make lint`                             | n/a          | both repos  | **both**                | ✅  |
+| 9   | `make <standard target>` behaves identically across repos                    | no           | yes         | **byte-identical**      | ✅  |
+| 10  | targets shared by two or more adopting repos that sit *outside* the standard | 3            | 0           | **0**                   | ✅  |
 
 Nine of ten met. The one that is not:
 
@@ -404,9 +404,9 @@ reasoned about.
     dispatch, then ghost/backfill/renames *(doppler)* — **done**,
     [doppler-dsp/doppler#558](https://github.com/doppler-dsp/doppler/pull/558)
     plus four follow-ups (#559 re-vendor, #560 criterion 6, #561 the CI-only
-    gates, #562 the binary gates). 50 hand-maintained targets became **0 shared
-    + 25 genuinely doppler's own**; `help` went from 30-of-50 (advertising two
-    that did not work) to 67-of-67 generated.
+    gates, #562 the binary gates). 50 hand-maintained targets became
+    **0 shared plus 25 genuinely doppler's own**; `help` went from 30-of-50
+    (advertising two that did not work) to 67-of-67 generated.
 
     Two things the port could not express, both worked around in the repo
     rather than by editing the vendored copy, and both feeding the next
@@ -436,10 +436,10 @@ reasoned about.
     duplicate in the same commit *(per repo)* — **in progress**, and the
     measured state differs sharply by repo:
 
-    | repo | `run:` steps | `make` | plumbing | unclassified |
-    | --- | --- | --- | --- | --- |
-    | doppler | 74 | 29 | 39 | **6** |
-    | just-makeit | 71 | 5 | 24 | **42** |
+    | repo        | `run:` steps | `make` | plumbing | unclassified |
+    | ----------- | ------------ | ------ | -------- | ------------ |
+    | doppler     | 74           | 29     | 39       | **6**        |
+    | just-makeit | 71           | 5      | 24       | **42**       |
 
     doppler is substantially done: every gate in `ci.yml` and `docs.yml` now
     calls a target, including four that had never been runnable outside CI
@@ -476,17 +476,22 @@ reasoned about.
 
 ## Decision log
 
-- **`jb-deps.toml` beats stdin** when both are present. TTY detection
+- **`bootstrap.toml` beats stdin** when both are present. TTY detection
     (`[ -t 0 ]`) doesn't survive `bash -c` or CI — file-first is the only
     reliable ordering.
-- **Filename prefix is `jb-`**, not `jbs-` — the deps file is an org-level
-    convention, not a just-bashit-specific one.
-- **`jb` may conflict** (e.g. Jenkins X used `jx`; `jb` could be taken too).
+- ~~**Filename prefix is `jb-`**, not `jbs-` — the deps file is an org-level
+    convention, not a just-bashit-specific one.~~ **Superseded**: the prefix
+    named a tool, which is the mistake `bootstrap.toml` corrects. The reasoning
+    survives the reversal — it is why the new name is org-level too.
+- ~~**`jb` may conflict** (e.g. Jenkins X used `jx`; `jb` could be taken too).
     Installer detects this and falls back to `just-buildit`, which is always
-    installed and unique.
-- **`jbx` is the runner shorthand** — `jb run` for the subcommand form,
+    installed and unique.~~ **Superseded**: neither name is installed now.
+    `get-jb.sh` stopped creating the `jb` and `just-buildit` symlinks and
+    prunes them on upgrade, so there is nothing left to collide — and
+    `just-buildit` was the worse fallback anyway, being the build backend.
+- **`jbx` is the runner** — `just-runit` for the subcommand form,
     `jbx` for fast one-liners. Both always installed.
-- **`jb.toml` is standalone**, not a `[tool.jb]` table in `pyproject.toml`.
+- **`bootstrap.toml` is standalone**, not a `[tool.*]` table in `pyproject.toml`.
     Uniform across project types; Python packaging metadata stays uncoupled
     from cross-org tooling.
 - **`--pep517` delegates** instead of re-implementing scaffolding.
