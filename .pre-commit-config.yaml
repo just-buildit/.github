@@ -18,10 +18,10 @@ repos:
     hooks:
       - id: sync-profile
         name: profile/README.md is generated from README.md
-        entry: scripts/sync-profile.sh
+        entry: .github/scripts/sync-profile.sh
         language: system
         pass_filenames: false
-        files: ^(README\.md|profile/README\.md|scripts/sync-profile\.sh)$
+        files: ^(README\.md|profile/README\.md|\.github/scripts/sync-profile\.sh)$
 
   - repo: https://github.com/hukkin/mdformat
     rev: 1.0.0

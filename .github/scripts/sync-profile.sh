@@ -13,11 +13,11 @@
 # is exactly the public half, so it is DERIVED: everything above the fold
 # marker. One source, one generated copy, and a hook that regenerates it.
 #
-# Usage:  scripts/sync-profile.sh          # rewrite profile/README.md
-#         scripts/sync-profile.sh --check  # exit 1 if it would change
+# Usage:  .github/scripts/sync-profile.sh          # rewrite profile/README.md
+#         .github/scripts/sync-profile.sh --check  # exit 1 if it would change
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 SRC="README.md"
 DEST="profile/README.md"
@@ -54,7 +54,7 @@ fi
 if [ "${1:-}" = "--check" ]; then
 	if ! diff -u "${DEST}" "${tmp}"; then
 		echo "" >&2
-		echo "sync-profile: ${DEST} is stale — run scripts/sync-profile.sh" >&2
+		echo "sync-profile: ${DEST} is stale — run .github/scripts/sync-profile.sh" >&2
 		exit 1
 	fi
 	echo "sync-profile: ${DEST} matches ${SRC}"
