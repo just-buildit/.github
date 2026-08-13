@@ -75,6 +75,52 @@ function dispatch, sandboxed env — all there.
 URL. The default is `just-buildit`, served from the org-pages root with
 a curated `aliases.toml`. `jbx install-deps` just works; `jbx gh:user/repo/tool` hits GitHub raw directly.
 
+## One `make` interface, everywhere
+
+Every repo in the org answers the same targets, because every repo vendors the
+same [`standard.mk`](https://just-buildit.github.io/standard.mk). You do not
+have to read a project's Makefile to work on it:
+
+```sh
+make help          # every target, generated from the rules — never hand-listed
+make setup         # one-time per clone: dependencies + the git hook
+make install-deps  # system packages, from bootstrap.toml
+make test          # the default suite
+make lint          # the gate CI runs — and CI runs nothing else
+make format        # auto-fix with every configured formatter
+```
+
+Adopting it is one fetch and one include. Vendor the file:
+
+```sh
+curl -fsSL https://just-buildit.github.io/standard.mk -o standard.mk
+```
+
+…then your Makefile is **configuration only** — feature flags and the commands
+behind them, never a copy of the shared rules:
+
+```make
+# Makefile
+TEST_CMD      = pytest
+TEST_FAST_CMD = pytest -x
+CLEAN_PATHS   = dist/ build/
+include standard.mk
+```
+
+That is the whole adoption, and it is enough for `make help`, `test`, `lint`,
+`format` and `clean`. Nine feature flags add the rest — `HAS_C`, `HAS_PYTHON`,
+`HAS_RUST`, `HAS_DOCS`, `HAS_DOXYGEN`, `HAS_BENCH`, `HAS_COVERAGE`,
+`HAS_RELEASE`, `HAS_EXAMPLES` — and each requires the command behind it: a flag
+with nothing to run is a parse error, not a target that silently does nothing.
+
+Each file owns one concern: the **Makefile** says *how* a tool runs,
+`pyproject.toml` says *which version*, and `.pre-commit-config.yaml` says
+*when* — dispatching back in with `make lint-<tool>` so a hook and CI cannot
+disagree about what a check means.
+
+Vendoring arms a drift gate: `make lint` re-fetches canonical every time and
+fails on any difference, so the copy in your repo cannot quietly become a fork.
+
 ## Get started
 
 ```sh
