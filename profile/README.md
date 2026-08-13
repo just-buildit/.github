@@ -13,14 +13,26 @@ tooling pulls the rest on demand.
 
 ## Tools
 
-| Name                                                                                                       | Role                                            | Get it                                                    | Status                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**just-runit**](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit) (`jbx`) | Fast ephemeral script runner                    | `. <(curl -sSL https://just-buildit.github.io/get-jb.sh)` | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
-| [**just-bashit**](https://github.com/just-buildit/just-bashit)                                             | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"`                     | [![CI](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)                                                                                                 |
-| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`)                                      | Python C extensions out-of-the-box              | `pip install just-makeit`                                 | [![PyPI](https://img.shields.io/pypi/v/just-makeit)](https://pypi.org/project/just-makeit/) [![CI](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml)     |
-| [**just-buildit**](https://github.com/just-buildit/just-buildit)                                           | Zero-dep PEP 517 build backend for C extensions | `pip install just-buildit`                                | [![PyPI](https://img.shields.io/pypi/v/just-buildit)](https://pypi.org/project/just-buildit/) [![CI](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml/badge.svg)](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml) |
+[![just-bashit CI](https://img.shields.io/github/actions/workflow/status/just-buildit/just-bashit/ci.yml?label=just-bashit%20CI)](https://github.com/just-buildit/just-bashit/actions/workflows/ci.yml)
+[![just-makeit CI](https://img.shields.io/github/actions/workflow/status/just-buildit/just-makeit/ci.yml?label=just-makeit%20CI)](https://github.com/just-buildit/just-makeit/actions/workflows/ci.yml)
+[![just-buildit CI](https://img.shields.io/github/actions/workflow/status/just-buildit/just-buildit/ci.yml?label=just-buildit%20CI)](https://github.com/just-buildit/just-buildit/actions/workflows/ci.yml)
+[![just-bashit on PyPI](https://img.shields.io/pypi/v/just-bashit?label=just-bashit&color=blue)](https://pypi.org/project/just-bashit/)
+[![just-makeit on PyPI](https://img.shields.io/pypi/v/just-makeit?label=just-makeit&color=blue)](https://pypi.org/project/just-makeit/)
+[![just-buildit on PyPI](https://img.shields.io/pypi/v/just-buildit?label=just-buildit&color=blue)](https://pypi.org/project/just-buildit/)
 
-Each tool stands alone. They also compose.
+**[`jbx`](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit)
+is the entry point** — a fast ephemeral script runner that fetches, runs and
+discards. One curl line installs it (see *Get started* below), and everything
+below is reachable through it. `just-runit` is the same runner under its full
+name, for the subcommand form.
+
+**The toolchain** — each piece stands alone, and they compose:
+
+| Name                                                                  | Role                                            | Get it                                |
+| --------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------- |
+| [**just-bashit**](https://github.com/just-buildit/just-bashit)        | Proven bash scripts & tools                     | `jbx just-bashit:logging log "hello"` |
+| [**just-makeit**](https://github.com/just-buildit/just-makeit) (`jm`) | Python C extensions out-of-the-box              | `pip install just-makeit`             |
+| [**just-buildit**](https://github.com/just-buildit/just-buildit)      | Zero-dep PEP 517 build backend for C extensions | `pip install just-buildit`            |
 
 ## How they fit together
 
