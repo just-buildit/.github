@@ -20,11 +20,29 @@ tooling pulls the rest on demand.
 [![just-makeit on PyPI](https://img.shields.io/pypi/v/just-makeit?label=just-makeit&color=blue)](https://pypi.org/project/just-makeit/)
 [![just-buildit on PyPI](https://img.shields.io/pypi/v/just-buildit?label=just-buildit&color=blue)](https://pypi.org/project/just-buildit/)
 
-**[`jbx`](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit)
-is the entry point** — a fast ephemeral script runner that fetches, runs and
-discards. One curl line installs it (see *Get started* below), and everything
-below is reachable through it. `just-runit` is the same runner under its full
-name, for the subcommand form.
+<table>
+<tr><td>
+
+### ⚡ `jbx` — start here
+
+**A fast ephemeral script runner: fetches, runs, discards.** One curl line
+installs it, and everything else in the org is reachable through it — no
+Python, no Docker, no clone.
+
+```sh
+. <(curl -sSL https://just-buildit.github.io/get-jb.sh)   # the only curl you need
+
+jbx install-deps                      # system packages, from bootstrap.toml
+jbx just-bashit:logging log "hello"   # any script in the org, by name
+jbx gh:user/repo/tool                 # or anything on GitHub, by URL
+```
+
+Namespaces, PEP 723 inline deps, cache TTL, checksum verification and a
+sandboxed env are all built in. [`just-runit`](https://github.com/just-buildit/just-bashit/blob/main/src/just_bashit/just-runit)
+is the same runner under its full name, for the subcommand form.
+
+</td></tr>
+</table>
 
 **The toolchain** — each piece stands alone, and they compose:
 
@@ -60,7 +78,7 @@ a curated `aliases.toml`. `jbx install-deps` just works; `jbx gh:user/repo/tool`
 ## Get started
 
 ```sh
-# Get the universal entrypoint (installs just-runit + jbx) — only curl line you need
+# Install jbx (and just-runit, the same runner's full name)
 . <(curl -sSL https://just-buildit.github.io/get-jb.sh)
 
 # Install just-makeit, then stand up a Python+C extension
