@@ -8,10 +8,25 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
+  # GitHub renders profile/README.md as the ORG landing page; the root
+  # README.md is just this repo's README. They were two hand-maintained copies
+  # of the same public text, and the bootstrap.toml rename updated only the
+  # root one — leaving the actual public page advertising `jb` and `jb.toml`.
+  # profile/ is derived from README.md's above-the-fold half now, so the two
+  # cannot disagree. Runs before mdformat so the copy gets formatted too.
+  - repo: local
+    hooks:
+      - id: sync-profile
+        name: profile/README.md is generated from README.md
+        entry: scripts/sync-profile.sh
+        language: system
+        pass_filenames: false
+        files: ^(README\.md|profile/README\.md|scripts/sync-profile\.sh)$
+
   - repo: https://github.com/hukkin/mdformat
     rev: 1.0.0
     hooks:
-      - id: mdformat            # README.md (the org profile)
+      - id: mdformat            # both READMEs: this repo's, and the org profile
         additional_dependencies:
           - mdformat-gfm
           - mdformat-gfm-alerts

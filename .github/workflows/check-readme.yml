@@ -27,6 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Before checking the content, check it is the RIGHT content. profile/ is
+      # generated from README.md's above-the-fold half; a machine committing
+      # without pre-commit installed would otherwise push the two out of step,
+      # and that failure is invisible to the check below — every link still
+      # resolves, the page is merely stale. Which is exactly what happened: the
+      # bootstrap.toml rename updated README.md alone, and the public page went
+      # on advertising `jb`, `jb.toml` and `jb-deps.toml`.
+      - name: profile/README.md is in sync with README.md
+        run: scripts/sync-profile.sh --check
       - name: Check profile/README.md
         run: .github/scripts/check-readme-content.sh profile/README.md
 
