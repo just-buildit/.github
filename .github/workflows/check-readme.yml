@@ -35,9 +35,18 @@ jobs:
       # bootstrap.toml rename updated README.md alone, and the public page went
       # on advertising `jb`, `jb.toml` and `jb-deps.toml`.
       - name: profile/README.md is in sync with README.md
-        run: scripts/sync-profile.sh --check
+        run: .github/scripts/sync-profile.sh --check
       - name: Check profile/README.md
         run: .github/scripts/check-readme-content.sh profile/README.md
+      # ...and that it RENDERS. The check above asks whether every URL answers,
+      # which a page with broken markup passes perfectly — the card's markdown
+      # is nested in an HTML block, and one missing blank line turns a heading
+      # into literal "### ..." while every link still resolves. Rendered
+      # through GitHub's own markdown API, so this is what the page will do.
+      - name: profile/README.md and README.md render
+        run: .github/scripts/check-rendering.sh profile/README.md README.md
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   # ------------------------------------------------------------------
   # Aggregator: the single "CI passed" check the `main` ruleset requires.
